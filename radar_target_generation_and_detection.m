@@ -13,7 +13,7 @@ clc;
 %% User Defined Range and Velocity of target
 % *%TODO* :
 % define the target's initial position and velocity. Note : Velocity
-% remains contant
+% remains constant
 R=110;  % Must not exceed 200m
 v=-20;  % Must be in [-70, +70] m/s
 c=2.998e8;  % Light speed
@@ -174,6 +174,7 @@ offset = 5;
 % *%TODO* :
 %Create a vector to store noise_level for each iteration on training cells
 
+% The sliding window that will be used to compute the noise_level
 n_rows = Nr/2-2*(Td+Gd);
 n_cols = Nd-2*(Tr+Gr);
 noise_level = zeros(n_rows,n_cols);
@@ -190,7 +191,7 @@ noise_level = zeros(n_rows,n_cols);
 %it a value of 1, else equate it to 0.
 
 CFAR = zeros(size(RDM));
-non_training_count = (2*Gr+1)*(2*Gd+1)
+non_training_count = (2*Gr+1)*(2*Gd+1);
 
    % Use RDM[x,y] as the matrix from the output of 2D FFT for implementing
    % CFAR
@@ -198,6 +199,7 @@ non_training_count = (2*Gr+1)*(2*Gd+1)
 for i=1:n_rows
     for j=1:n_cols
         training_cells = db2pow(RDM(i:i+2*(Td+Gd), j:j+2*(Gr+Tr)));
+        % Set to 0 cells in the sliding window that are not training cells (CUT and guard)
         training_cells(Td+1:end-Td, Tr+1:end-Tr)=0;
         noise_level(i, j) = pow2db(sum(training_cells, 'all')/(numel(training_cells)-non_training_count));
         threshold = noise_level(i, j) + offset;

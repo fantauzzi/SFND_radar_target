@@ -1,5 +1,4 @@
 from matplotlib import pyplot as plt
-from matplotlib import cm
 import numpy as np
 import math
 
@@ -11,7 +10,7 @@ import math
 # Max Velocity = 100 m/s
 ###########################
 
-# Define the target's initial position and velocity. Note : Velocity remains contant
+# Define the target's initial position and velocity. Note : Velocity remains constant
 R = 110.  # Must not exceed 200m
 v = -20.  # Must be within [-70, +70] ,/s
 c = 2.998e8  # Speed of light in m/s
@@ -21,7 +20,6 @@ c = 2.998e8  # Speed of light in m/s
 # Design the FMCW waveform by giving the specs of each of its parameters.
 # Calculate the Bandwidth (B), Chirp Time (Tchirp) and Slope (slope) of the FMCW
 # chirp using the requirements above.
-
 range_res = 1.  # Radar range resolution
 B = c / (2 * range_res)  # Chirp (sweep) bandwidth
 R_max = 200.  # Radar max range
@@ -54,7 +52,6 @@ td = np.zeros(n_samples)
 
 ## Signal generation and Moving Target simulation
 # Running the radar scenario over the time.
-
 for i in range(n_samples):
     # For each time stamp update the Range of the Target for constant velocity.
 
@@ -75,7 +72,6 @@ Mix = Tx * Rx
 
 ## RANGE MEASUREMENT
 
-
 # reshape the vector into Nr*Nd array. Nr and Nd here would also define the size of
 # Range and Doppler FFT respectively.
 
@@ -85,13 +81,10 @@ Mix = Tx * Rx
 # normalize.
 
 # Take the absolute value of FFT output
-
 Mix_freq = np.abs(np.fft.fft(Mix, Nr) / Nr)
 
-# *%TODO* :
 # Output of FFT is double sided signal, but we are interested in only one side of the spectrum.
 # Hence we throw out half of the samples.
-
 Mix_freq = Mix_freq[0:Nr // 2]
 
 assert Nr % 2 == 0
@@ -101,24 +94,19 @@ assert Nr % 2 == 0
 # subplot(2,1,1)
 
 # plot FFT output
-
 plt.plot(Mix_freq)
 plt.show()
-
-# axis ([0 200 0 1]);
 
 ## RANGE DOPPLER RESPONSE
 # The 2D FFT implementation is already provided here. This will run a 2DFFT
 # on the mixed signal (beat signal) output and generate a range doppler
 # map.You will implement CFAR on the generated RDM
 
-
 # Range Doppler Map Generation.
 
 # The output of the 2D FFT is an image that has reponse in the range and
 # doppler FFT bins. So, it is important to convert the axis from bin sizes
 # to range and doppler based on their Max values.
-
 Mix = np.reshape(Mix, [Nr, Nd], order='F')  # Note: Matlab default is to reshape by columns, Numpy default is by rows
 
 # 2D FFT using the FFT size for both dimensions.
@@ -141,7 +129,7 @@ ax = fig.gca(projection='3d')
 # Plot the surface.
 doppler_axis, range_axis = np.meshgrid(doppler_axis, range_axis)
 surf = ax.plot_surface(doppler_axis, range_axis, RDM, cmap='coolwarm',
-                       linewidth=0, antialiased=False)
+                       linewidth=0, antialiased=True)
 plt.show()
 
 ## CFAR implementation
@@ -198,13 +186,13 @@ def pow2db(x):
 
 for i in range(n_rows):
     for j in range(n_cols):
-        training_cells = db2pow(RDM[i:i + 2 * (Td + Gd), j:j + 2 * (Gr + Tr)])
-        training_cells[Td + 1:-Td, Tr + 1:-Tr] = 0
+        training_cells = db2pow(RDM[i:i + 2 * (Td + Gd) + 1, j:j + 2 * (Gr + Tr) + 1])
+        training_cells[Td :-Td, Tr :-Tr] = 0
         noise_level[i, j] = pow2db(np.sum(training_cells) / (np.size(training_cells) - non_training_count))
         threshold = noise_level[i, j] + offset
         CFAR[i + Td + Gd, j + Td + Gr] = 1 if RDM[i + Td + Gd, j + Td + Gr] > threshold else 0
 
-    # The process above will generate a thresholded block, which is smaller
+# The process above will generate a thresholded block, which is smaller
 # than the Range Doppler Map as the CUT cannot be located at the edges of
 # matrix. Hence,few cells will not be thresholded. To keep the map size same
 #  set those values to 0.
@@ -218,5 +206,5 @@ fig = plt.figure()
 ax = fig.gca(projection='3d')
 # Plot the surface.
 surf = ax.plot_surface(doppler_axis, range_axis, CFAR, cmap='coolwarm',
-                       antialiased=False)
+                       antialiased=True)
 plt.show()
