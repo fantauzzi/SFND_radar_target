@@ -31,6 +31,8 @@ Td = 4  # Training doppler -> rows
 Guard Band
 Gr = 4  # Guard range -> columns
 Gd = 2  # Guard doppler -> rows
+
+Offset before thresholding is 5db
 ```
 
 For every position of the window, I compute the average of the RDM cells that coincide with the training band of the window. This average is the noise level, which I increase by a given offset (5 dB), and then use to threshold the cell of the RDM that falls in the centre of the window (the CUT -Cell Under Test).
