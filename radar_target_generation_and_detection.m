@@ -91,7 +91,7 @@ Mix = Tx .* Rx;
 %reshape the vector into Nr*Nd array. Nr and Nd here would also define the size of
 %Range and Doppler FFT respectively.
 
-Mix = reshape(Mix, [1,(Nr*Nd)]);
+% The array is alreadt of the desired shape
 
 % *%TODO* :
 %run the FFT on the beat signal along the range bins dimension (Nr) and
@@ -118,7 +118,6 @@ subplot(2,1,1)
 plot(Mix_freq);
  
 axis ([0 200 0 1]);
-
 
 
 %% RANGE DOPPLER RESPONSE
@@ -170,7 +169,7 @@ Gd=2;
 % *%TODO* :
 % offset the threshold by SNR value in dB
 
-offset = 6;
+offset = 5;
 
 % *%TODO* :
 %Create a vector to store noise_level for each iteration on training cells
